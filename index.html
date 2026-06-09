@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)file:///C:/Users/Rocio/Downloads/martina-planner.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Martina · Planner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:#0f0f10; --surface:#1a1a1e; --surface2:#222228; --surface3:#28282f;
+  --border:#2e2e36; --border2:#3a3a44;
+  --text:#e8e8ec; --muted:#7a7a8c; --muted2:#55555f;
+  --desert:#e8a94a; --desert-dim:rgba(232,169,74,.13); --desert-border:rgba(232,169,74,.25);
+  --campo:#5ab88a;  --campo-dim:rgba(90,184,138,.13);  --campo-border:rgba(90,184,138,.25);
+  --safira:#8b7cf6; --safira-dim:rgba(139,124,246,.13);--safira-border:rgba(139,124,246,.25);
+  --danger:#e8614a; --danger-dim:rgba(232,97,74,.12);
+  --done-bg:#252529; --done-text:#44444e;
+  --radius:12px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:28px 16px 80px;}
+
+header{max-width:1060px;margin:0 auto 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.title-block h1{font-size:20px;font-weight:600;letter-spacing:-.3px;}
+.title-block p{font-size:12px;color:var(--muted);margin-top:3px;}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.week-nav{display:flex;align-items:center;gap:8px;}
+.week-nav button{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:var(--radius-sm);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s;}
+.week-nav button:hover{color:var(--text);border-color:var(--muted);}
+#week-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:145px;text-align:center;}
+.btn{padding:7px 14px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--desert);border-color:var(--desert);color:#0f0f10;}
+.btn-primary:hover{background:#f0b84e;}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--muted);color:var(--text);}
+
+.sync-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background .3s;}
+.sync-dot.ok{background:#5ab88a;}
+.sync-dot.saving{background:var(--desert);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.progress-bar{max-width:1060px;margin:0 auto 20px;background:var(--surface);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:16px;border:1px solid var(--border);flex-wrap:wrap;}
+.progress-bar .lbl{font-size:11px;color:var(--muted);white-space:nowrap;}
+.bar-track{flex:1;min-width:100px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--desert),var(--safira));transition:width .4s ease;}
+.stats{display:flex;gap:18px;}
+.stat .num{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;display:block;}
+.stat .sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+
+.summary{max-width:1060px;margin:0 auto 20px;display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:5px 11px;border-radius:20px;font-size:11px;border:1px solid;display:flex;align-items:center;gap:5px;}
+.chip.desert{background:var(--desert-dim);border-color:var(--desert-border);color:var(--desert);}
+.chip.campo {background:var(--campo-dim); border-color:var(--campo-border); color:var(--campo);}
+.chip.safira{background:var(--safira-dim);border-color:var(--safira-border);color:var(--safira);}
+.chip-count{font-family:'DM Mono',monospace;font-weight:500;}
+
+.grid{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:720px){.grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:420px){.grid{grid-template-columns:1fr;}}
+
+.day-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;}
+.day-col.drag-over{border-color:var(--desert);background:rgba(232,169,74,.04);}
+.day-header{padding:11px 13px 9px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;}
+.day-name{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+.day-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.day-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:5px 13px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;justify-content:space-between;}
+.tasks{padding:8px 8px 10px;display:flex;flex-direction:column;gap:5px;min-height:70px;}
+
+.task{border-radius:var(--radius-sm);padding:7px 9px;cursor:grab;user-select:none;display:flex;align-items:flex-start;gap:7px;border:1px solid transparent;transition:opacity .2s,transform .15s;position:relative;}
+.task:active{cursor:grabbing;}
+.task.dragging{opacity:.4;transform:scale(.97);}
+.task.desert{background:var(--desert-dim);border-color:var(--desert-border);}
+.task.campo {background:var(--campo-dim); border-color:var(--campo-border);}
+.task.safira{background:var(--safira-dim);border-color:var(--safira-border);}
+.task.done  {background:var(--done-bg)!important;border-color:transparent!important;opacity:.45;}
+
+.task-check{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--muted);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;transition:background .15s,border-color .15s;cursor:pointer;}
+.task.done .task-check{background:var(--muted2);border-color:var(--muted2);color:var(--bg);}
+.task-info{flex:1;min-width:0;}
+.task-client{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;}
+.task.desert .task-client{color:var(--desert);}
+.task.campo  .task-client{color:var(--campo);}
+.task.safira .task-client{color:var(--safira);}
+.task.done   .task-client{color:var(--muted2);}
+.task-label{font-size:11.5px;color:var(--text);line-height:1.35;word-break:break-word;}
+.task.done .task-label{color:var(--muted2);text-decoration:line-through;}
+.task-row{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
+.badge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:500;letter-spacing:.3px;}
+.badge-reel    {background:rgba(232,169,74,.18);color:var(--desert);}
+.badge-posteo  {background:rgba(90,184,138,.18);color:var(--campo);}
+.badge-historia{background:rgba(139,124,246,.18);color:var(--safira);}
+.badge-invest  {background:rgba(139,124,246,.18);color:var(--safira);}
+.task-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.task-actions{display:flex;gap:4px;flex-shrink:0;margin-top:1px;}
+.task-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px;border-radius:4px;line-height:1;transition:color .15s;}
+.task-btn:hover{color:var(--text);}
+.task-btn.del:hover{color:var(--danger);}
+.empty-day{font-size:11px;color:var(--muted2);padding:4px 2px;font-style:italic;}
+
+.note{max-width:1060px;margin:20px auto 0;font-size:11px;color:var(--muted);padding:11px 15px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);line-height:1.7;}
+.note strong{color:var(--text);}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+.modal h2{font-size:15px;font-weight:600;margin-bottom:18px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 11px;border-radius:var(--radius-sm);outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:var(--desert);}
+.field select option{background:var(--surface2);}
+.modal-row{display:flex;gap:8px;margin-top:6px;}
+.modal-row .btn{flex:1;justify-content:center;padding:9px;}
+.btn-danger{background:var(--danger-dim);border-color:var(--danger);color:var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+
+/* Setup screen */
+.setup{max-width:480px;margin:80px auto;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px;}
+.setup h2{font-size:17px;font-weight:600;margin-bottom:8px;}
+.setup p{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+.setup .field input{font-family:'DM Mono',monospace;font-size:12px;}
+.setup-note{font-size:11px;color:var(--muted2);margin-top:12px;line-height:1.6;}
+.setup-note a{color:var(--safira);text-decoration:none;}
+.setup-note a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<!-- SETUP (se muestra si no hay BIN configurado) -->
+<div id="setup-screen" class="setup" style="display: none;">
+  <h2>Configuración inicial</h2>
+  <p>Para sincronizar entre vos y Martina necesitás una cuenta gratuita en <strong>JSONBin.io</strong>. Tomá 2 minutos y seguí los pasos.</p>
+  <div class="field">
+    <label>API Key de JSONBin</label>
+    <input type="text" id="setup-key" placeholder="$2b$10$...">
+  </div>
+  <div class="field">
+    <label>Bin ID (se crea automático la primera vez)</label>
+    <input type="text" id="setup-bin" placeholder="Dejalo vacío la primera vez">
+  </div>
+  <button class="btn btn-primary" style="width:100%;padding:10px" onclick="setupSave()">Guardar y continuar</button>
+  <p class="setup-note">
+    1. Entrá a <a href="https://jsonbin.io/" target="_blank">jsonbin.io</a> y creá una cuenta gratuita.<br>
+    2. Andá a <strong>API Keys</strong> y copiá tu key secreta.<br>
+    3. Pegala arriba y hacé click en Guardar. El Bin ID se genera solo.
+  </p>
+</div>
+
+<!-- APP -->
+<div id="app" style="display: block;">
+
+<header>
+  <div class="title-block">
+    <h1>Planner de Martina</h1>
+    <p>Lun – Jue · 15:00–19:00 · Viernes libre</p>
+  </div>
+  <div class="header-actions">
+    <div class="sync-status"><div class="sync-dot error" id="sync-dot"></div><span id="sync-label">error al crear</span></div>
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)">‹</button>
+      <span id="week-label"></span>
+      <button onclick="changeWeek(1)">›</button>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">+ Tarea</button>
+  </div>
+</header>
+
+<div class="progress-bar">
+  <span class="lbl">Mes completo</span>
+  <div class="bar-track"><div class="bar-fill" id="bar-fill" style="width:0%"></div></div>
+  <div class="stats">
+    <div class="stat"><span class="num" id="stat-done">0</span><span class="sub">hechas</span></div>
+    <div class="stat"><span class="num" id="stat-total">0</span><span class="sub">total</span></div>
+    <div class="stat"><span class="num" id="stat-hours">0h</span><span class="sub">usadas</span></div>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="chip desert"><span class="chip-count">Desert</span> Eventos</div>
+  <div class="chip campo"><span class="chip-count">De Campo</span></div>
+  <div class="chip safira"><span class="chip-count">Safira</span></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="note">
+  <strong>Prioridad:</strong> Desert → De Campo → Safira &nbsp;·&nbsp;
+  <strong>Mover:</strong> arrastrá una tarea a otro día &nbsp;·&nbsp;
+  <strong>Editar:</strong> ícono ✎ &nbsp;·&nbsp;
+  <strong>Eliminar:</strong> ícono ✕ &nbsp;·&nbsp;
+  Los cambios se sincronizan automáticamente.
+</div>
+
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <h2 id="modal-title">Nueva tarea</h2>
+    <div class="field"><label>Descripción</label><input type="text" id="f-label" placeholder="Ej: Reel Desert semana 1"></div>
+    <div class="field"><label>Cliente</label>
+      <select id="f-client">
+        <option value="desert">Desert Eventos</option>
+        <option value="campo">De Campo</option>
+        <option value="safira">Safira</option>
+      </select>
+    </div>
+    <div class="field"><label>Tipo</label>
+      <select id="f-type">
+        <option value="reel">Reel</option>
+        <option value="posteo">Posteo</option>
+        <option value="historia">Historia</option>
+        <option value="invest">Investigación / Moodboard</option>
+      </select>
+    </div>
+    <div class="field"><label>Semana</label>
+      <select id="f-week"><option value="1">Semana 1</option><option value="2">Semana 2</option><option value="3">Semana 3</option><option value="4">Semana 4</option></select>
+    </div>
+    <div class="field"><label>Día</label>
+      <select id="f-day"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option></select>
+    </div>
+    <div class="field"><label>Horas estimadas</label><input type="number" id="f-hours" value="1" min="0.25" max="4" step="0.25"></div>
+    <div class="modal-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="btn-delete" onclick="deleteTask()" style="display:none">Eliminar</button>
+      <button class="btn btn-primary" onclick="saveTask()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+let API_KEY = localStorage.getItem('jb-key') || '';
+let BIN_ID  = localStorage.getItem('jb-bin') || '';
+
+// ─── DEFAULT TASKS ────────────────────────────────────────
+const DEFAULT_TASKS = [
+  {id:'s1-d-r1', week:1,day:1,client:'desert',label:'Reel Desert #1',           type:'reel',    hours:1.5},
+  {id:'s1-c-r1', week:1,day:1,client:'campo', label:'Reel De Campo #1',          type:'reel',    hours:1.5},
+  {id:'s1-d-p1', week:1,day:2,client:'desert',label:'Posteo Desert #1',          type:'posteo',  hours:0.75},
+  {id:'s1-d-h1', week:1,day:2,client:'desert',label:'Historias Desert (×2)',     type:'historia',hours:0.5},
+  {id:'s1-c-p1', week:1,day:2,client:'campo', label:'Posteos De Campo (×2)',     type:'posteo',  hours:1.0},
+  {id:'s1-c-h1', week:1,day:3,client:'campo', label:'Historia De Campo',         type:'historia',hours:0.5},
+  {id:'s1-s-inv',week:1,day:3,client:'safira',label:'Investigación de identidad',type:'invest',  hours:1.0},
+  {id:'s2-d-r2', week:2,day:1,client:'desert',label:'Reel Desert #2',            type:'reel',    hours:1.5},
+  {id:'s2-c-r2', week:2,day:1,client:'campo', label:'Reel De Campo #2',          type:'reel',    hours:1.5},
+  {id:'s2-d-p2', week:2,day:2,client:'desert',label:'Posteo Desert #2',          type:'posteo',  hours:0.75},
+  {id:'s2-d-h2', week:2,day:2,client:'desert',label:'Historias Desert (×2)',     type:'historia',hours:0.5},
+  {id:'s2-c-p2', week:2,day:2,client:'campo', label:'Posteos De Campo (×2)',     type:'posteo',  hours:1.0},
+  {id:'s2-c-h2', week:2,day:3,client:'campo', label:'Historia De Campo',         type:'historia',hours:0.5},
+  {id:'s2-s-ref',week:2,day:3,client:'safira',label:'Referencias y competencia', type:'invest',  hours:1.0},
+  {id:'s3-d-r3', week:3,day:1,client:'desert',label:'Reel Desert #3',            type:'reel',    hours:1.5},
+  {id:'s3-c-r3', week:3,day:1,client:'campo', label:'Reel De Campo #3',          type:'reel',    hours:1.5},
+  {id:'s3-d-p3', week:3,day:2,client:'desert',label:'Posteo Desert #3',          type:'posteo',  hours:0.75},
+  {id:'s3-d-h3', week:3,day:2,client:'desert',label:'Historias Desert (×2)',     type:'historia',hours:0.5},
+  {id:'s3-c-p3', week:3,day:2,client:'campo', label:'Posteos De Campo (×2)',     type:'posteo',  hours:1.0},
+  {id:'s3-c-h3', week:3,day:3,client:'campo', label:'Historia De Campo',         type:'historia',hours:0.5},
+  {id:'s3-s-mood',week:3,day:3,client:'safira',label:'Moodboard visual',         type:'invest',  hours:1.5},
+  {id:'s4-c-r4', week:4,day:1,client:'campo', label:'Reel De Campo #4',          type:'reel',    hours:1.5},
+  {id:'s4-d-h4', week:4,day:1,client:'desert',label:'Historias Desert (×2)',     type:'historia',hours:0.5},
+  {id:'s4-c-p4', week:4,day:2,client:'campo', label:'Posteos De Campo (×2)',     type:'posteo',  hours:1.0},
+  {id:'s4-c-h4', week:4,day:2,client:'campo', label:'Historia De Campo',         type:'historia',hours:0.5},
+  {id:'s4-s-pre',week:4,day:3,client:'safira',label:'Presentación de identidad', type:'invest',  hours:1.0},
+];
+
+// ─── STATE ───────────────────────────────────────────────
+let tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+let doneSet = new Set();
+let currentWeek = getCurrentWeekOfMonth();
+let editingId = null;
+let dragId    = null;
+let saveTimer = null;
+
+// ─── CONSTANTS ───────────────────────────────────────────
+const CLIENT_ORDER = {desert:0,campo:1,safira:2};
+const CLIENT_LABEL = {desert:'Desert Eventos',campo:'De Campo',safira:'Safira'};
+const DAY_NAMES    = ['Lunes','Martes','Miércoles','Jueves'];
+const BADGE_CLASS  = {reel:'badge-reel',posteo:'badge-posteo',historia:'badge-historia',invest:'badge-invest'};
+const BADGE_LABEL  = {reel:'REEL',posteo:'POSTEO',historia:'HISTORIA',invest:'INVESTIGACIÓN'};
+
+// ─── INIT ────────────────────────────────────────────────
+function init() {
+  if (!API_KEY) { showSetup(); return; }
+  showApp();
+  loadFromCloud();
+  setInterval(loadFromCloud, 30000); // poll cada 30s
+}
+
+function showSetup() {
+  document.getElementById('setup-screen').style.display='block';
+  document.getElementById('app').style.display='none';
+}
+function showApp() {
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+
+function setupSave() {
+  const key = document.getElementById('setup-key').value.trim();
+  const bin = document.getElementById('setup-bin').value.trim();
+  if (!key) { alert('Necesitás pegar tu API Key'); return; }
+  API_KEY = key;
+  BIN_ID  = bin;
+  localStorage.setItem('jb-key', key);
+  if (bin) localStorage.setItem('jb-bin', bin);
+  showApp();
+  if (bin) { loadFromCloud(); } else { createBin(); }
+  setInterval(loadFromCloud, 30000);
+}
+
+// ─── CLOUD ───────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = text;
+}
+
+async function createBin() {
+  setSyncStatus('saving','creando…');
+  try {
+    const res = await fetch(`${JSONBIN_BASE}/b`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':API_KEY,'X-Bin-Name':'martina-planner'},
+      body: JSON.stringify({ tasks, done: [...doneSet] })
+    });
+    const data = await res.json();
+    BIN_ID = data.metadata.id;
+    localStorage.setItem('jb-bin', BIN_ID);
+    setSyncStatus('ok','sincronizado');
+    render();
+  } catch(e) { setSyncStatus('error','error al crear'); }
+}
+
+async function loadFromCloud() {
+  if (!BIN_ID) return;
+  setSyncStatus('saving','cargando…');
+  try {
+    const res = await fetch(`${JSONBIN_BASE}/b/${BIN_ID}/latest`, {
+      headers:{'X-Master-Key':API_KEY}
+    });
+    const data = await res.json();
+    const rec = data.record;
+    if (rec && rec.tasks) {
+      tasks   = rec.tasks;
+      doneSet = new Set(rec.done || []);
+    }
+    setSyncStatus('ok','sincronizado');
+    render();
+  } catch(e) { setSyncStatus('error','sin conexión'); render(); }
+}
+
+async function saveToCloud() {
+  if (!BIN_ID) return;
+  setSyncStatus('saving','guardando…');
+  try {
+    await fetch(`${JSONBIN_BASE}/b/${BIN_ID}`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
+      body: JSON.stringify({ tasks, done: [...doneSet] })
+    });
+    setSyncStatus('ok','guardado ✓');
+  } catch(e) { setSyncStatus('error','error al guardar'); }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToCloud, 800);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────
+function getCurrentWeekOfMonth() {
+  return Math.min(4, Math.max(1, Math.ceil(new Date().getDate() / 7)));
+}
+function getWeekDates(w) {
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  const first=new Date(y,m,1);
+  const mon = first.getDay()===1 ? 1 : (1+(8-first.getDay())%7);
+  const start=new Date(y,m,mon+(w-1)*7);
+  return Array.from({length:4},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d;});
+}
+function fmt(d){ return d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0'); }
+function uid(){ return 'task-'+Date.now()+'-'+Math.random().toString(36).slice(2,6); }
+
+// ─── RENDER ──────────────────────────────────────────────
+function render() {
+  const dates = getWeekDates(currentWeek);
+  document.getElementById('week-label').textContent = `Semana ${currentWeek} · ${fmt(dates[0])} – ${fmt(dates[3])}`;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  for (let d=1; d<=4; d++) {
+    const dayTasks = tasks
+      .filter(t=>t.week===currentWeek && t.day===d)
+      .sort((a,b)=>CLIENT_ORDER[a.client]-CLIENT_ORDER[b.client]);
+    const hrs = dayTasks.reduce((s,t)=>s+t.hours,0);
+
+    const col = document.createElement('div');
+    col.className='day-col';
+    col.dataset.day=d;
+    col.innerHTML=`
+      <div class="day-header">
+        <span class="day-name">${DAY_NAMES[d-1]}</span>
+        <span class="day-date">${fmt(dates[d-1])}</span>
+      </div>
+      <div class="day-meta">
+        <span>15:00–19:00</span>
+        <span>${hrs>0?'~'+hrs.toFixed(1)+'h':'—'}</span>
+      </div>
+      <div class="tasks" id="col-${d}"></div>
+    `;
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('drag-over');});
+    col.addEventListener('dragleave',()=>col.classList.remove('drag-over'));
+    col.addEventListener('drop',e=>{
+      e.preventDefault(); col.classList.remove('drag-over');
+      if(dragId){ const t=tasks.find(x=>x.id===dragId); if(t){t.day=parseInt(col.dataset.day);scheduleSave();render();} dragId=null; }
+    });
+    grid.appendChild(col);
+
+    const tasksEl = col.querySelector(`#col-${d}`);
+    if(dayTasks.length===0){
+      tasksEl.innerHTML='<span class="empty-day">Sin tareas</span>';
+    } else {
+      dayTasks.forEach(t=>{
+        const done=doneSet.has(t.id);
+        const el=document.createElement('div');
+        el.className=`task ${t.client} ${done?'done':''}`;
+        el.draggable=true;
+        el.dataset.id=t.id;
+        el.innerHTML=`
+          <div class="task-check" onclick="toggleDone(event,'${t.id}')">${done?'✓':''}</div>
+          <div class="task-info">
+            <div class="task-client">${CLIENT_LABEL[t.client]}</div>
+            <div class="task-label">${t.label}</div>
+            <div class="task-row">
+              <span class="badge ${BADGE_CLASS[t.type]}">${BADGE_LABEL[t.type]}</span>
+              <span class="task-time">~${t.hours}h</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="task-btn" onclick="openModal('${t.id}')" title="Editar">✎</button>
+            <button class="task-btn del" onclick="confirmDelete(event,'${t.id}')" title="Eliminar">✕</button>
+          </div>
+        `;
+        el.addEventListener('dragstart',()=>{dragId=t.id;el.classList.add('dragging');});
+        el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+        tasksEl.appendChild(el);
+      });
+    }
+  }
+  updateProgress();
+}
+
+function toggleDone(e,id){
+  e.stopPropagation();
+  doneSet.has(id)?doneSet.delete(id):doneSet.add(id);
+  scheduleSave(); render();
+}
+function confirmDelete(e,id){
+  e.stopPropagation();
+  if(confirm('¿Eliminar esta tarea?')){ tasks=tasks.filter(t=>t.id!==id); scheduleSave(); render(); }
+}
+function updateProgress(){
+  const total=tasks.length, done=tasks.filter(t=>doneSet.has(t.id)).length;
+  const hrs=tasks.filter(t=>doneSet.has(t.id)).reduce((s,t)=>s+t.hours,0);
+  document.getElementById('bar-fill').style.width=(total?done/total*100:0)+'%';
+  document.getElementById('stat-done').textContent=done;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-hours').textContent=hrs.toFixed(1)+'h';
+}
+
+// ─── MODAL ───────────────────────────────────────────────
+function openModal(id=null){
+  editingId=id;
+  const t=id?tasks.find(x=>x.id===id):null;
+  document.getElementById('modal-title').textContent=t?'Editar tarea':'Nueva tarea';
+  document.getElementById('f-label').value=t?t.label:'';
+  document.getElementById('f-client').value=t?t.client:'desert';
+  document.getElementById('f-type').value=t?t.type:'reel';
+  document.getElementById('f-week').value=t?t.week:currentWeek;
+  document.getElementById('f-day').value=t?t.day:1;
+  document.getElementById('f-hours').value=t?t.hours:1;
+  document.getElementById('btn-delete').style.display=t?'block':'none';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('f-label').focus(),50);
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
+function handleOverlayClick(e){ if(e.target===document.getElementById('modal-overlay')) closeModal(); }
+function saveTask(){
+  const label=document.getElementById('f-label').value.trim();
+  if(!label){ document.getElementById('f-label').focus(); return; }
+  const data={
+    id:editingId||uid(), label,
+    client:document.getElementById('f-client').value,
+    type:document.getElementById('f-type').value,
+    week:parseInt(document.getElementById('f-week').value),
+    day:parseInt(document.getElementById('f-day').value),
+    hours:parseFloat(document.getElementById('f-hours').value)||1,
+  };
+  if(editingId){ const i=tasks.findIndex(t=>t.id===editingId); if(i>-1) tasks[i]=data; }
+  else tasks.push(data);
+  scheduleSave(); closeModal(); render();
+}
+function deleteTask(){
+  if(!editingId) return;
+  if(confirm('¿Eliminar esta tarea?')){ tasks=tasks.filter(t=>t.id!==editingId); scheduleSave(); closeModal(); render(); }
+}
+function changeWeek(dir){ currentWeek=Math.max(1,Math.min(4,currentWeek+dir)); render(); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('modal-overlay').classList.contains('open')) saveTask();
+  if(e.key==='Escape') closeModal();
+});
+
+init();
+</script>
+
+
+</body></html>
